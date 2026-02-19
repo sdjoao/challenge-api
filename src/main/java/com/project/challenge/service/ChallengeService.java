@@ -71,9 +71,38 @@ public class ChallengeService {
         return ChallengeMapper.conversor(challenge);
     }
 
+    public ChallengeResponseDTO evaluete(Long id){
+        Challenge challenge = findById(id);
+        if(!challenge.isActive()){
+            throw new BusinessException("Desáfio inátivo, não é possível adicionar score.");
+        }
+        if(challenge.getScore() > 100){
+            challenge.setActive(false);
+        }
+        switch (challenge.getDifficulty().name()) {
+            case "EASY":
+                challenge.setScore(challenge.getScore() + 10);
+                break;
+            case "MEDIUM":
+                challenge.setScore(challenge.getScore() + 20);
+                break;
+            case "HARD":
+                challenge.setScore(challenge.getScore() + 30);
+                break;
+            default:
+                break;
+        }
+        challengeRepository.save(challenge);
+        return ChallengeMapper.conversor(challenge);
+    }
+
     public void deleteChallenge(Long id){
         Challenge challenge = findById(id);
         challengeRepository.delete(challenge);
+    }
+
+    public List<ChallengeResponseDTO> ranking(){
+        return ChallengeMapper.listConversor(challengeRepository.findChallengeActiveByScore());
     }
     
 }
