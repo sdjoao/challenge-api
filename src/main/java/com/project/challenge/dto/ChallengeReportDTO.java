@@ -6,12 +6,14 @@ public class ChallengeReportDTO {
     private String title;
     private String difficulty;
     private float score;
+    private boolean active;
     
-    public ChallengeReportDTO(Long id, String title, String difficulty, float score) {
+    public ChallengeReportDTO(Long id, String title, String difficulty, float score, boolean active) {
         this.id = id;
         this.title = title;
         this.difficulty = difficulty;
         this.score = score;
+        this.active = active;
     }
 
     public Long getId() {
@@ -30,5 +32,8 @@ public class ChallengeReportDTO {
         return score;
     }
 
+    public boolean isActive() {
+        return active;
+    }
     
 }

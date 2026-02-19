@@ -2,6 +2,8 @@ package com.project.challenge.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,18 +14,22 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project.challenge.dto.ChallengeReportDTO;
 import com.project.challenge.dto.ChallengeRequestDTO;
 import com.project.challenge.dto.ChallengeResponseDTO;
 import com.project.challenge.service.ChallengeService;
+import com.project.challenge.service.ReportService;
 
 @RestController
-@RequestMapping("/challenge")
+@RequestMapping("/challenges")
 public class ChallengeController {
     
     private final ChallengeService challengeService;
+    private final ReportService reportService;
 
-    public ChallengeController(ChallengeService challengeService){
+    public ChallengeController(ChallengeService challengeService, ReportService reportService){
         this.challengeService = challengeService;
+        this.reportService = reportService;
     }
 
     @PostMapping
@@ -44,6 +50,23 @@ public class ChallengeController {
     @GetMapping("/ranking")
     public ResponseEntity<List<ChallengeResponseDTO>> getRanking(){
         return ResponseEntity.ok().body(challengeService.ranking());
+    }
+
+    // endpoint para gerar o relatório
+    @GetMapping("/reports/challenges")
+    public ResponseEntity<byte[]> generateReport() throws Exception {
+
+        List<ChallengeReportDTO> dados =
+                challengeService.getChallengeReportData();
+
+        byte[] pdf =
+                reportService.gerarRelatorioDesafios(dados);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=products.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 
     @PutMapping("/{id}")

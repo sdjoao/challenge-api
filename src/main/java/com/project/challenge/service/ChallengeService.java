@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.project.challenge.dto.ChallengeReportDTO;
 import com.project.challenge.dto.ChallengeRequestDTO;
 import com.project.challenge.dto.ChallengeResponseDTO;
 import com.project.challenge.entity.Challenge;
@@ -29,7 +30,7 @@ public class ChallengeService {
         if(request.description() == null || request.description().isBlank()){
             throw new BusinessException("Descrição inválida ou não preenchida.");
         }
-        if(request.difficulty() != ChallengeDifficulty.EASY ||request.difficulty() != ChallengeDifficulty.MEDIUM || request.difficulty() != ChallengeDifficulty.HARD){
+        if(request.difficulty() != ChallengeDifficulty.EASY && request.difficulty() != ChallengeDifficulty.MEDIUM && request.difficulty() != ChallengeDifficulty.HARD){
             throw new BusinessException("Tipo de dificuldade inválido.");
         }
         if(request.score() <= 0){
@@ -78,6 +79,7 @@ public class ChallengeService {
         }
         if(challenge.getScore() > 100){
             challenge.setActive(false);
+            challengeRepository.save(challenge);
         }
         switch (challenge.getDifficulty().name()) {
             case "EASY":
@@ -103,6 +105,20 @@ public class ChallengeService {
 
     public List<ChallengeResponseDTO> ranking(){
         return ChallengeMapper.listConversor(challengeRepository.findChallengeActiveByScore());
+    }
+
+    // método para gerar relatórios de desáfios
+    public List<ChallengeReportDTO> getChallengeReportData(){
+        return challengeRepository.findAll()
+            .stream()
+            .map(challenge ->  new ChallengeReportDTO(
+                    challenge.getId(),
+                    challenge.getTitle(),
+                    challenge.getDifficulty().name(),
+                    challenge.getScore(),
+                    challenge.isActive()
+            ))
+            .toList();
     }
     
 }
